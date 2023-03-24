@@ -1,0 +1,80 @@
+var createScene = function () {
+    // This creates a basic Babylon Scene object (non-mesh)
+    var scene = new BABYLON.Scene(engine);
+
+    // This creates and positions a free camera (non-mesh)
+    var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, 25), scene);
+
+    // This targets the camera to scene origin
+    camera.setTarget(BABYLON.Vector3.Zero());
+
+    // This attaches the camera to the canvas
+    camera.attachControl(canvas, true);
+
+    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+    var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+    // Default intensity is 1. Let's dim the light a small amount
+    light.intensity = 0.7;
+
+    // 1
+    // Crear un emisor de partículas para el fuego
+
+    var particle = BABYLON.MeshBuilder.CreateSphere("particle", { diameter: 0.5 }, scene);
+    particle.material = new BABYLON.StandardMaterial("particleMat", scene);
+    particle.material.emissiveColor = new BABYLON.Color3(1, 0.8, 0);
+    particle.material.disableLighting = true;
+
+    var particleSystem = new BABYLON.ParticleSystem("particles", 2000, scene);
+    particleSystem.particleTexture = new BABYLON.Texture("textures/flare.png", scene);
+    particleSystem.emitter = new BABYLON.Vector3(0, 0, 0);
+    particleSystem.minEmitBox = new BABYLON.Vector3(-0.5, 0, -0.5);
+    particleSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0, 0.5);
+    particleSystem.color1 = new BABYLON.Color4(1, 0.5, 0, 1);
+    particleSystem.color2 = new BABYLON.Color4(1, 0, 0, 1);
+    particleSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+    particleSystem.minSize = 0.1;
+    particleSystem.maxSize = 0.5;
+    particleSystem.minLifeTime = 0.3;
+    particleSystem.maxLifeTime = 1.5;
+    particleSystem.emitRate = 1500;
+    particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+    particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+    particleSystem.direction1 = new BABYLON.Vector3(-1, -1, -1);
+    particleSystem.direction2 = new BABYLON.Vector3(1, 1, 1);
+    particleSystem.minAngularSpeed = 0;
+    particleSystem.maxAngularSpeed = Math.PI;
+    particleSystem.minEmitPower = 1;
+    particleSystem.maxEmitPower = 3;
+    particleSystem.updateSpeed = 0.005;
+    particleSystem.start();
+
+    var animation = new BABYLON.Animation("animation", "emitter", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    var keys = [];
+    keys.push({ frame: 0, value: new BABYLON.Vector3(0, 0, 0) });
+    keys.push({ frame: 10, value: new BABYLON.Vector3(0, 2, 0) });
+    keys.push({ frame: 30, value: new BABYLON.Vector3(0, 5, 0) });
+    animation.setKeys(keys);
+
+    particleSystem.animations.push(animation);
+    scene.beginAnimation(particleSystem, 0, 30, false, 1);
+
+    var explosion = new BABYLON.Animation("explosion", "maxEmitPower", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    var explosionKeys = [];
+    explosionKeys.push({ frame: 0, value: 3 });
+    explosionKeys.push({ frame: 20, value: 50 });
+    explosionKeys.push({ frame: 30, value: 0 });
+    explosion.setKeys(explosionKeys);
+
+    particleSystem.animations.push(explosion);
+    scene.beginAnimation(particleSystem, 0, 30, false, 1, function () {
+        particleSystem.dispose();
+    });
+   
+
+
+    // Our built-in 'ground' shape.
+    var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene);
+
+    return scene;
+};

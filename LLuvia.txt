@@ -1,0 +1,75 @@
+var createScene = function () {
+    // This creates a basic Babylon Scene object (non-mesh)
+    var scene = new BABYLON.Scene(engine);
+    var engine = new BABYLON.Engine(canvas, true);
+
+    // This creates and positions a free camera (non-mesh)
+    var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 1, 1), scene);
+    // This targets the camera to scene origin
+    camera.setTarget(BABYLON.Vector3.Zero());
+
+    // This attaches the camera to the canvas
+    camera.attachControl(canvas, true);
+
+    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+    var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+    // Default intensity is 1. Let's dim the light a small amount
+    light.intensity = 0.7;
+
+    // 1
+    // Crear un emisor de partículas para la fuente de agua
+    var particleSystem = new BABYLON.ParticleSystem("water", 2000, scene);
+
+    // Establecer la textura de las partículas
+    particleSystem.particleTexture = new BABYLON.Texture("textures/particle.png", scene);
+
+    // Establecer la velocidad inicial de las partículas
+    particleSystem.emitRate = 500;
+    particleSystem.minEmitPower = 1;
+    particleSystem.maxEmitPower = 3;
+    particleSystem.minLifeTime = 1;
+    particleSystem.maxLifeTime = 3;
+
+    // Establecer la gravedad y la aceleración de las partículas
+    particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+
+    // Establecer la dirección inicial de las partículas hacia un punto específico en el espacio
+    var target = new BABYLON.Vector3(0, 3, 0);
+    var horizontalDirection1 = new BABYLON.Vector3(1, 0, 1).normalize();
+    var horizontalDirection2 = new BABYLON.Vector3(-1, 0, -1).normalize();
+    particleSystem.direction1 = target.subtract(new BABYLON.Vector3(-2, 0, 2)).add(horizontalDirection1).normalize();
+    particleSystem.direction2 = target.subtract(new BABYLON.Vector3(2, 0, -2)).add(horizontalDirection2).normalize();
+
+    // Establecer una velocidad inicial en la dirección vertical
+    particleSystem.minEmitBox = new BABYLON.Vector3(0, 1, 0);
+    particleSystem.maxEmitBox = new BABYLON.Vector3(0, 1, 0);
+
+    // Establecer el rozamiento con el aire
+    particleSystem.addDragGradient(0, 1);
+    particleSystem.addDragGradient(0.3, 0.5);
+    particleSystem.addDragGradient(1.0, 0);
+
+    // Iniciar la emisión de partículas
+    particleSystem.start();
+
+    // En el render loop, ajustar la dirección y la velocidad de las partículas
+    engine.runRenderLoop(function () {
+        scene.render();
+
+        var time = scene.getEngine().getDeltaTime() / 2000;
+        particleSystem.direction1 = particleSystem.direction1.add(new BABYLON.Vector3(horizontalDirection1.x, -9.81 * time, horizontalDirection1.z));
+        particleSystem.direction2 = particleSystem.direction2.add(new BABYLON.Vector3(horizontalDirection2.x, -9.81 * time, horizontalDirection2.z));
+        particleSystem.minEmitBox.y += particleSystem.minEmitPower * time;
+        particleSystem.maxEmitBox.y += particleSystem.maxEmitPower * time;
+    });
+
+    window.addEventListener("resize", function () {
+        engine.resize();
+    });
+    // Our built-in 'ground' shape.
+    var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene);
+    ground.position.y = -1;
+    return scene;
+
+};

@@ -1,0 +1,107 @@
+var createScene = function () {
+    // This creates a basic Babylon Scene object (non-mesh)
+    var scene = new BABYLON.Scene(engine);
+
+    // This creates and positions a free camera (non-mesh)
+    var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, 13), scene);
+
+    // This targets the camera to scene origin
+    camera.setTarget(BABYLON.Vector3.Zero());
+
+    // This attaches the camera to the canvas
+    camera.attachControl(canvas, true);
+
+    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+    var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+    // Default intensity is 1. Let's dim the light a small amount
+    light.intensity = 0.7;
+
+    // 1
+    // Crear un emisor de partículas para el fuego
+    var fireSystem = new BABYLON.ParticleSystem("fire", 2000, scene);
+    fireSystem.particleTexture = new BABYLON.Texture("textures/flare.png", scene);
+
+    // Establecer la posición del emisor de partículas
+    fireSystem.emitter = new BABYLON.Vector3(0, 0, 0);
+
+    // Establecer la velocidad y la dirección de las partículas
+    fireSystem.minEmitBox = new BABYLON.Vector3(-0.5, 0, -0.5);
+    fireSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0, 0.5);
+    fireSystem.direction1 = new BABYLON.Vector3(-1, 4, 1);
+    fireSystem.direction2 = new BABYLON.Vector3(1, 4, -1);
+
+    // Establecer la velocidad inicial de las partículas
+    fireSystem.minEmitPower = 4;
+    fireSystem.maxEmitPower = 6;
+
+    // Establecer la vida útil de las partículas
+    fireSystem.minLifeTime = 0.2;
+    fireSystem.maxLifeTime = 0.4;
+
+    // Establecer el tamaño de las partículas
+    fireSystem.minSize = 0.3;
+    fireSystem.maxSize = 1;
+
+    // Establecer la gravedad de las partículas
+    fireSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+
+    // Establecer el color inicial y final de las partículas
+    fireSystem.color1 = new BABYLON.Color4(1, 0.5, 0, 1);
+    fireSystem.color2 = new BABYLON.Color4(1, 0, 0, 1);
+    fireSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+
+    // Iniciar la emisión de partículas
+    fireSystem.start();
+
+    // Crear un sistema de partículas para el humo
+    var smokeSystem = new BABYLON.ParticleSystem("smoke", 1000, scene);
+    smokeSystem.particleTexture = new BABYLON.Texture("textures/cloud.png", scene);
+
+    // Establecer la velocidad inicial de las partículas
+    smokeSystem.minEmitPower = 1;
+    smokeSystem.maxEmitPower = 3;
+
+    // Establecer la vida útil de las partículas
+    smokeSystem.minLifeTime = 2;
+    smokeSystem.maxLifeTime = 4;
+
+    // Establecer la dirección y velocidad de las partículas
+    smokeSystem.direction1 = new BABYLON.Vector3(-1, 8, -1);
+    smokeSystem.direction2 = new BABYLON.Vector3(1, 8, 1);
+    smokeSystem.minEmitBox = new BABYLON.Vector3(-0.5, 0, -0.5);
+    smokeSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0, 0.5);
+    smokeSystem.emitRate = 100;
+
+    // Establecer la gravedad y la aceleración de las partículas
+    smokeSystem.gravity = new BABYLON.Vector3(0, -0.5, 0);
+
+    // Establecer el color y la transparencia de las partículas
+    smokeSystem.color1 = new BABYLON.Color4(0.1, 0.1, 0.1, 1.0);
+    smokeSystem.color2 = new BABYLON.Color4(0.2, 0.2, 0.2, 1.0);
+    smokeSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+
+    // Establecer la forma de las partículas
+    smokeSystem.minSize = 0.1;
+    smokeSystem.maxSize = 0.5;
+    smokeSystem.minScaleX = 0.1;
+    smokeSystem.maxScaleX = 1;
+    smokeSystem.minScaleY = 0.1;
+    smokeSystem.maxScaleY = 1;
+    smokeSystem.minAngularSpeed = 0;
+    smokeSystem.maxAngularSpeed = Math.PI;
+    smokeSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
+
+    // Iniciar la emisión de partículas
+    smokeSystem.start();
+    // Our built-in 'sphere' shape.
+    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 1, segments: 13 }, scene);
+    sphere.particleTexture = new BABYLON.Texture("textures/cloud.png", scene);
+    // Move the sphere upward 1/2 its height
+    sphere.position.y = 0;
+
+    // Our built-in 'ground' shape.
+    var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene);
+
+    return scene;
+};
