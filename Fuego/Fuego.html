@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js sample code</title>
+
+        <!-- Babylon.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://assets.babylonjs.com/generated/Assets.js"></script>
+        <script src="https://preview.babylonjs.com/ammo.js"></script>
+        <script src="https://preview.babylonjs.com/cannon.js"></script>
+        <script src="https://preview.babylonjs.com/Oimo.js"></script>
+        <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+            
+            #canvasZone {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+<body>
+    <div id="canvasZone"><canvas id="renderCanvas"></canvas></div>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var startRenderLoop = function (engine, canvas) {
+            engine.runRenderLoop(function () {
+                if (sceneToRender && sceneToRender.activeCamera) {
+                    sceneToRender.render();
+                }
+            });
+        }
+
+        var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
+        var createScene = function () {
+    var scene = new BABYLON.Scene(engine);
+
+    var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, 13), scene);
+
+    camera.setTarget(BABYLON.Vector3.Zero());
+
+    camera.attachControl(canvas, true);
+
+    var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+    light.intensity = 0.7;
+
+
+    var fireSystem = new BABYLON.ParticleSystem("fire", 2000, scene);
+    fireSystem.particleTexture = new BABYLON.Texture("flare.png", scene);
+
+    fireSystem.emitter = new BABYLON.Vector3(0, 0, 0);
+
+    fireSystem.minEmitBox = new BABYLON.Vector3(-0.5, 0, -0.5);
+    fireSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0, 0.5);
+    fireSystem.direction1 = new BABYLON.Vector3(-1, 4, 1);
+    fireSystem.direction2 = new BABYLON.Vector3(1, 4, -1);
+
+    fireSystem.minEmitPower = 4;
+    fireSystem.maxEmitPower = 6;
+
+    fireSystem.minLifeTime = 0.2;
+    fireSystem.maxLifeTime = 0.4;
+
+    fireSystem.minSize = 0.3;
+    fireSystem.maxSize = 1;
+
+    fireSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+
+    fireSystem.color1 = new BABYLON.Color4(1, 0.5, 0, 1);
+    fireSystem.color2 = new BABYLON.Color4(1, 0, 0, 1);
+    fireSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+
+    fireSystem.start();
+
+    var smokeSystem = new BABYLON.ParticleSystem("smoke", 1000, scene);
+    smokeSystem.particleTexture = new BABYLON.Texture("cloud.png", scene);
+
+    smokeSystem.minEmitPower = 1;
+    smokeSystem.maxEmitPower = 3;
+
+    smokeSystem.minLifeTime = 2;
+    smokeSystem.maxLifeTime = 4;
+
+    smokeSystem.direction1 = new BABYLON.Vector3(-1, 8, -1);
+    smokeSystem.direction2 = new BABYLON.Vector3(1, 8, 1);
+    smokeSystem.minEmitBox = new BABYLON.Vector3(-0.5, 0, -0.5);
+    smokeSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0, 0.5);
+    smokeSystem.emitRate = 100;
+
+    smokeSystem.gravity = new BABYLON.Vector3(0, -0.5, 0);
+
+    smokeSystem.color1 = new BABYLON.Color4(0.1, 0.1, 0.1, 1.0);
+    smokeSystem.color2 = new BABYLON.Color4(0.2, 0.2, 0.2, 1.0);
+    smokeSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0);
+
+    smokeSystem.minSize = 0.1;
+    smokeSystem.maxSize = 0.5;
+    smokeSystem.minScaleX = 0.1;
+    smokeSystem.maxScaleX = 1;
+    smokeSystem.minScaleY = 0.1;
+    smokeSystem.maxScaleY = 1;
+    smokeSystem.minAngularSpeed = 0;
+    smokeSystem.maxAngularSpeed = Math.PI;
+    smokeSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_STANDARD;
+
+    smokeSystem.start();
+    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 1, segments: 13 }, scene);
+    sphere.particleTexture = new BABYLON.Texture("cloud.png", scene);
+    sphere.position.y = 0;
+
+    var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene);
+
+    return scene;
+};
+                window.initFunction = async function() {
+                    
+                    
+                    var asyncEngineCreation = async function() {
+                        try {
+                        return createDefaultEngine();
+                        } catch(e) {
+                        console.log("the available createEngine function failed. Creating the default engine instead");
+                        return createDefaultEngine();
+                        }
+                    }
+
+                    window.engine = await asyncEngineCreation();
+        if (!engine) throw 'engine should not be null.';
+        startRenderLoop(engine, canvas);
+        window.scene = createScene();};
+        initFunction().then(() => {sceneToRender = scene                    
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
